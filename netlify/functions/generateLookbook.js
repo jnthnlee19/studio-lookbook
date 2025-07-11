@@ -2,13 +2,29 @@ const { Octokit } = require("@octokit/rest");
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" })
+    };
   }
 
-  const { address, base64, htmlTemplate } = JSON.parse(event.body);
+  let bodyData;
+  try {
+    bodyData = JSON.parse(event.body);
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid JSON in request body" })
+    };
+  }
+
+  const { address, base64, htmlTemplate } = bodyData;
 
   if (!address || !base64 || !htmlTemplate) {
-    return { statusCode: 400, body: "Missing required fields" };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing required fields" })
+    };
   }
 
   const safeAddress = address.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
@@ -69,14 +85,15 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ url: `https://myonlinelookbook.netlify.app/customers/${safeAddress}.html` })
+      body: JSON.stringify({
+        url: `https://myonlinelookbook.netlify.app/customers/${safeAddress}.html`
+      })
     };
 
   } catch (error) {
-return {
-  statusCode: 500,
-  body: JSON.stringify({ error: `GitHub error: ${error.message}` })
-};
-
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: `GitHub error: ${error.message}` })
+    };
   }
 };

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KB Home | Lookbook</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      padding: 0.5rem 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .sticky-left img {
+      height: 65px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .sticky-center {
+      text-align: center;
+      flex-grow: 1;
+      margin: 0 1rem;
+    }
+
+    .sticky-center h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .sticky-center .controls {
+      margin-top: 0.4rem;
+    }
+
+    #search-input {
+      padding: 0.4rem;
+      width: 100%;
+      max-width: 350px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .sticky-right {
+      font-size: 1rem;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    button {
+      background: #FFC527;
+      color: #000;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0.3rem;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .info-bar {
+      text-align: center;
+      font-size: 1rem;
+      padding: 0.75rem 0;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    details {
+      background: #fff;
+      margin: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      background-color: #eee;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .option-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      position: relative;
+    }
+
+    .checkbox-container {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+    }
+
+    .option-select {
+      margin-right: 4px;
+      transform: scale(1.1);
+      accent-color: #FFC527;
+      outline: 2px solid #FFC527;
+      border-radius: 4px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .option-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 6px;
+      margin: 1.5rem 0 0.5rem;
+      cursor: pointer;
+      background: #f9f9f9;
+    }
+
+    .option-card-content {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .option-card-content strong {
+      font-size: 1rem;
+    }
+
+    .comment-box {
+      margin-top: auto;
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .enlarged-image {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 90%;
+      max-height: 90%;
+      z-index: 9999;
+      display: none;
+      border: 3px solid #333;
+      background: white;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sticky-header">
+  <div class="sticky-left">
+    <img src="images/kb-logo.png" alt="KB Home Logo" />
+  </div>
+
+  <div class="sticky-center">
+    <h1>KB Home Lookbook</h1>
+    <div class="controls">
+      <button onclick="toggleAll()">Expand/Collapse All</button>
+      <button onclick="printAllOptions()">Print All Options</button><br />
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search by option # or description..."
+        oninput="searchOptions()"
+      />
+    </div>
+  </div>
+
+  <div class="sticky-right" id="total-price">Total: $0.00</div>
+</div>
+
+<div class="info-bar"></div>
+
+<div id="lookbook-container">Loading...</div>
+<img id="popup-img" class="enlarged-image" />
+
+<script>
+const rawData = JSON.parse(localStorage.getItem('lookbookData'));
+const container = document.getElementById('lookbook-container');
+const totalPriceEl = document.getElementById('total-price');
+let selectedTotal = 0;
+let allExpanded = false;
+
+function updateTotal() {
+  totalPriceEl.textContent = `Total: $${selectedTotal.toFixed(2)}`;
+}
+
+function toggleAll() {
+  const allDetails = document.querySelectorAll("details");
+  allExpanded = !allExpanded;
+  allDetails.forEach(d => d.open = allExpanded);
+}
+
+function printAllOptions() {
+  window.open('print-all.html', '_blank');
+}
+
+function searchOptions() {
+  const term = document.getElementById('search-input').value.toLowerCase();
+  const cards = document.querySelectorAll('.option-card');
+  let firstMatch = null;
+
+  cards.forEach(card => {
+    const text = card.innerText.toLowerCase();
+    const match = text.includes(term);
+    card.style.display = match ? '' : 'none';
+    if (match && !firstMatch) firstMatch = card;
+  });
+
+  if (firstMatch) {
+    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// Enlarged image popup with slideshow support
+function showImageSlideshow(baseName) {
+  const popupContainer = document.createElement('div');
+  popupContainer.id = 'popup-container';
+  popupContainer.style.position = 'fixed';
+  popupContainer.style.top = '0';
+  popupContainer.style.left = '0';
+  popupContainer.style.width = '100vw';
+  popupContainer.style.height = '100vh';
+  popupContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
+  popupContainer.style.display = 'flex';
+  popupContainer.style.flexDirection = 'column';
+  popupContainer.style.alignItems = 'center';
+  popupContainer.style.justifyContent = 'center';
+  popupContainer.style.zIndex = '9999';
+
+  const mainImg = document.createElement('img');
+  mainImg.style.maxWidth = '90%';
+  mainImg.style.maxHeight = '80vh';
+  mainImg.style.borderRadius = '8px';
+  mainImg.style.boxShadow = '0 0 10px #000';
+  mainImg.style.marginBottom = '10px';
+
+  const thumbnails = document.createElement('div');
+  thumbnails.style.display = 'flex';
+  thumbnails.style.gap = '8px';
+  thumbnails.style.flexWrap = 'wrap';
+  thumbnails.style.justifyContent = 'center';
+
+  const closeBtn = document.createElement('div');
+  closeBtn.textContent = '×';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '10px';
+  closeBtn.style.right = '20px';
+  closeBtn.style.fontSize = '2rem';
+  closeBtn.style.color = '#fff';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.onclick = () => document.body.removeChild(popupContainer);
+
+  let currentSlideImages = [];
+  let index = 0;
+
+  const preloadAndShow = () => {
+    let i = 0;
+    const tryLoad = () => {
+      const imgPath = i === 0 ? `images/${baseName}.jpg` : `images/${baseName}-${i}.jpg`;
+      const img = new Image();
+      img.src = imgPath;
+      img.onload = () => {
+        currentSlideImages.push(imgPath);
+
+        const thumb = document.createElement('img');
+        thumb.src = imgPath;
+        thumb.style.width = '60px';
+        thumb.style.height = '60px';
+        thumb.style.objectFit = 'cover';
+        thumb.style.borderRadius = '4px';
+        thumb.style.cursor = 'pointer';
+        thumb.onclick = () => {
+          mainImg.src = imgPath;
+          index = i;
+        };
+        thumbnails.appendChild(thumb);
+
+        i++;
+        tryLoad();
+      };
+    };
+    tryLoad();
+  };
+
+  preloadAndShow();
+  mainImg.src = `images/${baseName}.jpg`;
+
+  popupContainer.appendChild(closeBtn);
+  popupContainer.appendChild(mainImg);
+  popupContainer.appendChild(thumbnails);
+  document.body.appendChild(popupContainer);
+}
+
+if (!rawData || rawData.length === 0) {
+  container.innerHTML = '<p style="text-align:center;">No data found.</p>';
+} else {
+  const infoRow = rawData[11]?.filter(c => c)?.join(' | ') || '';
+  document.querySelector('.info-bar').textContent = infoRow;
+
+  let currentCategory = null;
+  const group = {};
+
+  rawData.slice(14).forEach(row => {
+    const col0 = row[0];
+    const col2 = row[2];
+    const col9 = row[9];
+    const col13 = row[13];
+
+    if (typeof col0 === 'string' && col0.includes('>') && !col13) {
+      currentCategory = col0.trim();
+      if (!group[currentCategory]) group[currentCategory] = [];
+      return;
+    }
+
+    if (!isNaN(col0) && col2) {
+      const option = {
+        number: col0,
+        desc: col2,
+        sales: col9 || '',
+        price: col13 || ''
+      };
+      if (currentCategory) {
+        group[currentCategory].push(option);
+      }
+    }
+  });
+
+  container.innerHTML = '';
+
+  for (const category in group) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = category;
+    details.appendChild(summary);
+
+    const grid = document.createElement('div');
+    grid.className = 'option-grid';
+
+    group[category].forEach(opt => {
+      const card = document.createElement('div');
+      card.className = 'option-card';
+
+      const checkboxContainer = document.createElement('div');
+      checkboxContainer.className = 'checkbox-container';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'option-select';
+      checkbox.onchange = () => {
+        const price = parseFloat(opt.price);
+        if (!isNaN(price)) {
+          checkbox.checked ? selectedTotal += price : selectedTotal -= price;
+          updateTotal();
+        }
+      };
+
+      const label = document.createElement('label');
+      label.innerText = 'Selection Option';
+
+      checkboxContainer.appendChild(checkbox);
+      checkboxContainer.appendChild(label);
+
+      const img = document.createElement('img');
+      img.src = `images/${opt.number}.jpg`;
+      img.alt = opt.desc;
+      img.onerror = () => img.src = 'https://via.placeholder.com/150';
+      img.onclick = () => showImageSlideshow(opt.number);
+
+      const content = document.createElement('div');
+      content.className = 'option-card-content';
+      content.innerHTML = `
+        <strong>${opt.number}</strong>
+        ${opt.desc}<br>
+        <em>${opt.sales}</em><br>
+        <strong>$${opt.price || 'TBD'}</strong>
+      `;
+
+      const commentBox = document.createElement('textarea');
+      commentBox.className = 'comment-box';
+      commentBox.placeholder = 'Add comment...';
+
+      card.appendChild(checkboxContainer);
+      card.appendChild(img);
+      card.appendChild(content);
+      card.appendChild(commentBox);
+
+      grid.appendChild(card);
+    });
+
+    details.appendChild(grid);
+    container.appendChild(details);
+  }
+
+  updateTotal();
+}
+</script>
+
+</body>
+</html>

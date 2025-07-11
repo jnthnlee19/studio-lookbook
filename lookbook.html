@@ -196,12 +196,23 @@
     <div class="controls">
       <button onclick="toggleAll()">Expand/Collapse All</button>
       <button onclick="printAllOptions()">Print All Options</button><br />
-      <input
-        type="text"
-        id="search-input"
-        placeholder="Search by option # or description..."
-        oninput="searchOptions()"
-      />
+<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+  <input
+    type="text"
+    id="search-input"
+    placeholder="Search by option # or description..."
+    oninput="searchOptions()"
+    style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
+  />
+  <input
+    type="text"
+    id="address-input"
+    placeholder="Enter Address or Name"
+    style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
+  />
+  <button onclick="generateLookbook()">Generate</button>
+</div>
+
     </div>
   </div>
 
@@ -433,6 +444,14 @@ if (!rawData || rawData.length === 0) {
 
   updateTotal();
 }
+  function generateLookbook() {
+  const name = document.getElementById("address-input").value.trim();
+  if (!name) return alert("Please enter a name or address");
+
+  const safeName = name.toLowerCase().replace(/[^a-z0-9]/gi, '-');
+  window.location.href = `/customers/${safeName}/index.html`;
+}
+
 </script>
 
 </body>

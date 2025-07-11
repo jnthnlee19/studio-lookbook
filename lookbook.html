@@ -480,6 +480,27 @@ function generatePage() {
     alert("Error creating page: " + err.message);
   });
 }
+  async function generatePage() {
+  const address = document.getElementById("address-input").value.trim();
+  if (!address) return alert("Please enter an address");
+
+  const response = await fetch("/.netlify/functions/generateLookbook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address })
+  });
+
+  const result = await response.json();
+
+  if (response.ok) {
+    alert("Page created!");
+    window.open(result.file, "_blank");
+  } else {
+    alert("Error creating file: " + result.error);
+    console.error(result.details);
+  }
+}
+
 </script>
 
 </body>

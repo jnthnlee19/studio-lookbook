@@ -204,13 +204,14 @@
     oninput="searchOptions()"
     style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
   />
-  <input
-    type="text"
-    id="address-input"
-    placeholder="Enter Address or Name"
-    style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
-  />
-  <button onclick="generateLookbook()">Generate</button>
+<input
+  type="text"
+  id="address-input"
+  placeholder="Enter customer address..."
+  style="margin-top: 0.5rem; padding: 0.4rem; max-width: 350px; border-radius: 6px; border: 1px solid #ccc;"
+/>
+<button onclick="generatePage()">Generate</button>
+
 </div>
 
     </div>
@@ -452,6 +453,33 @@ if (!rawData || rawData.length === 0) {
   window.location.href = `/customers/${safeName}/index.html`;
 }
 
+</script>
+<script>
+function generatePage() {
+  const address = document.getElementById("address-input").value.trim();
+  if (!address) {
+    alert("Please enter a customer address.");
+    return;
+  }
+
+  const sanitizedAddress = address.replace(/[^a-zA-Z0-9]/g, ''); // Safe filename
+
+  fetch("/.netlify/functions/generateLookbook", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      address: sanitizedAddress,
+      htmlContent: document.documentElement.outerHTML
+    })
+  })
+  .then(res => res.text())
+  .then(msg => alert(msg))
+  .catch(err => {
+    alert("Error creating page: " + err.message);
+  });
+}
 </script>
 
 </body>

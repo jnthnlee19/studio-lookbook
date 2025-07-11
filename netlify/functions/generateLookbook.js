@@ -25,6 +25,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({ file: `/customers/${filename}` })
     };
   } catch (err) {
+    console.error("Error creating lookbook:", err); // 🔥 This line logs the real error
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal error", details: err.message })

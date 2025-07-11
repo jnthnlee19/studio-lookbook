@@ -1,29 +1,33 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-exports.handler = async function(event, context) {
-  const { address, htmlContent } = JSON.parse(event.body);
-
-  if (!address || !htmlContent) {
-    return {
-      statusCode: 400,
-      body: 'Missing address or html content',
-    };
-  }
-
+exports.handler = async (event) => {
   try {
-    const safeAddress = address.replace(/[^a-zA-Z0-9]/g, '');
-    const filePath = path.join(__dirname, `../../customers/${safeAddress}.html`);
-    fs.writeFileSync(filePath, htmlContent);
+    const body = JSON.parse(event.body || "{}");
+    const address = (body.address || "").trim();
+
+    if (!address) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing address in request body" })
+      };
+    }
+
+    const filename = `${address.replace(/\s+/g, "_")}.html`;
+    const sourcePath = path.join(__dirname, "..", "..", "lookbook.html");
+    const destPath = path.join(__dirname, "..", "..", "customers", filename);
+
+    const html = fs.readFileSync(sourcePath, "utf8");
+    fs.writeFileSync(destPath, html);
 
     return {
       statusCode: 200,
-      body: `Page created: ${safeAddress}.html`,
+      body: JSON.stringify({ file: `/customers/${filename}` })
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: `Error creating file: ${err.message}`,
+      body: JSON.stringify({ error: "Internal error", details: err.message })
     };
   }
 };

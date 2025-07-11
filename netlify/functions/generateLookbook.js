@@ -73,9 +73,10 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: `GitHub error: ${error.message}`
-    };
+return {
+  statusCode: 500,
+  body: JSON.stringify({ error: `GitHub error: ${error.message}` })
+};
+
   }
 };

@@ -204,15 +204,16 @@
     oninput="searchOptions()"
     style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
   />
-<input
-  type="text"
-  id="address-input"
-  placeholder="Enter customer address..."
-  style="margin-top: 0.5rem; padding: 0.4rem; max-width: 350px; border-radius: 6px; border: 1px solid #ccc;"
-/>
-<button onclick="generatePage()">Generate</button>
-
+<div id="generate-section">
+  <input
+    type="text"
+    id="address-input"
+    placeholder="Enter customer address..."
+    style="margin-top: 0.5rem; padding: 0.4rem; max-width: 350px; border-radius: 6px; border: 1px solid #ccc;"
+  />
+  <button onclick="generatePage()">Generate</button>
 </div>
+
 
     </div>
   </div>
@@ -480,6 +481,12 @@ if (!rawData || rawData.length === 0) {
       console.error("Response error:", e);
     }
   }
+  // Hide generate section on customer pages
+if (window.location.pathname.includes('/customers/')) {
+  const genSection = document.getElementById('generate-section');
+  if (genSection) genSection.style.display = 'none';
+}
+
 </script>
 
 

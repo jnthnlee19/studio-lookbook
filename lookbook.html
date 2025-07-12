@@ -279,6 +279,8 @@ function searchOptions() {
   if (firstMatch) {
     firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+  }
+
   function updateOptionTotal(input, unitPrice) {
   const qty = parseInt(input.value) || 1;
   const totalDisplay = input.closest('.option-card-content').querySelector('.option-total');
@@ -297,7 +299,6 @@ function searchOptions() {
   });
   updateTotal();
 }
-
 
 // Enlarged image popup with slideshow support
 function showImageSlideshow(baseName) {

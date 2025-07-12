@@ -435,17 +435,21 @@ if (!rawData || rawData.length === 0) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
- checkbox.onchange = () => {
+checkbox.onchange = () => {
   const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
   const qty = parseInt(qtyInput.value) || 1;
   const unitPrice = parseFloat(opt.price) || 0;
   const total = qty * unitPrice;
 
-  checkbox.checked ? selectedTotal += total : selectedTotal -= total;
-  updateTotal();
-
+  if (checkbox.checked) {
+    selectedTotal += total;
+  } else {
+    selectedTotal -= total;
   }
+
+  updateTotal();
 };
+
 
 
       const label = document.createElement('label');

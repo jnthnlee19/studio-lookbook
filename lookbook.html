@@ -279,6 +279,25 @@ function searchOptions() {
   if (firstMatch) {
     firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+  function updateOptionTotal(input, unitPrice) {
+  const qty = parseInt(input.value) || 1;
+  const totalDisplay = input.closest('.option-card-content').querySelector('.option-total');
+  const newPrice = unitPrice * qty;
+
+  totalDisplay.textContent = `$${newPrice.toFixed(2)}`;
+
+  // Recalculate grand total
+  selectedTotal = 0;
+  document.querySelectorAll('.option-select').forEach(cb => {
+    if (cb.checked) {
+      const qtyInput = cb.closest('.option-card').querySelector('.qty-input');
+      const price = parseFloat(cb.closest('.option-card').querySelector('.option-total').textContent.replace('$', '')) || 0;
+      selectedTotal += price;
+    }
+  });
+  updateTotal();
+}
+
 }
 
 // Enlarged image popup with slideshow support
@@ -417,10 +436,14 @@ if (!rawData || rawData.length === 0) {
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
       checkbox.onchange = () => {
-        const price = parseFloat(opt.price);
-        if (!isNaN(price)) {
-          checkbox.checked ? selectedTotal += price : selectedTotal -= price;
-          updateTotal();
+const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
+const qty = parseInt(qtyInput.value) || 1;
+const unitPrice = parseFloat(opt.price) || 0;
+const total = qty * unitPrice;
+
+checkbox.checked ? selectedTotal += total : selectedTotal -= total;
+updateTotal();
+
         }
       };
 
@@ -438,12 +461,14 @@ if (!rawData || rawData.length === 0) {
 
       const content = document.createElement('div');
       content.className = 'option-card-content';
-      content.innerHTML = `
-        <strong>${opt.number}</strong>
-        ${opt.desc}<br>
-        <em>${opt.sales}</em><br>
-        <strong>$${opt.price || 'TBD'}</strong>
-      `;
+content.innerHTML = `
+  <strong>${opt.number}</strong>
+  ${opt.desc}<br>
+  <em>${opt.sales}</em><br>
+  <label>Qty: <input type="number" class="qty-input" min="1" value="1" onchange="updateOptionTotal(this, ${parseFloat(opt.price) || 0})"></label><br>
+  <strong class="option-total">$${opt.price || 'TBD'}</strong>
+`;
+
 
       const commentBox = document.createElement('textarea');
       commentBox.className = 'comment-box';

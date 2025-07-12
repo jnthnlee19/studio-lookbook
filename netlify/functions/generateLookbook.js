@@ -27,7 +27,8 @@ exports.handler = async (event) => {
 
     // Replace placeholder with actual data
     const html = "<!DOCTYPE html>\n" + htmlTemplate
-      .replace("const rawData = {{LOOKBOOK_DATA}}", `const rawData = ${JSON.stringify(rawData)};`)
+.replace(/const rawData\s*=\s*{{LOOKBOOK_DATA}};/, `const rawData = ${JSON.stringify(rawData)};`)
+
       .replace(/src="images\//g, 'src="/images/');
 
     const octokit = new Octokit({ auth: process.env.GH_TOKEN });

@@ -255,7 +255,36 @@ if (base64) {
   const workbook = XLSX.read(base64, { type: 'base64' });
   const sheet = workbook.Sheets[workbook.SheetNames[1]];
   rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-}
+const infoRow = rawData[11]?.filter(c => c)?.join(' | ') || '';
+document.querySelector('.info-bar').textContent = infoRow;
+
+const group = {};
+let currentCategory = null;
+rawData.slice(14).forEach(row => {
+  const col0 = row[0];
+  const col2 = row[2];
+  const col9 = row[9];
+  const col13 = row[13];
+
+  if (typeof col0 === 'string' && col0.includes('>') && !col13) {
+    currentCategory = col0.trim();
+    if (!group[currentCategory]) group[currentCategory] = [];
+    return;
+  }
+
+  if (!isNaN(col0) && col2) {
+    const option = {
+      number: col0,
+      desc: col2,
+      sales: col9 || '',
+      price: col13 || ''
+    };
+    if (currentCategory) {
+      group[currentCategory].push(option);
+    }
+  }
+});
+
 
 let allExpanded = false;
 

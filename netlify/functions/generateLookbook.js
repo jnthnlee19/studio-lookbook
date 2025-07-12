@@ -19,7 +19,8 @@ exports.handler = async (event) => {
     const filename = `customers/${safeAddress}.html`;
 
     const html = "<!DOCTYPE html>\n" + htmlTemplate
-      .replace(/const base64 = localStorage\.getItem\('workbook'\);/, `const base64 = \`${base64}\`;`)
+  .replace(/const rawData = .*?;/, `const rawData = ${JSON.stringify(XLSX.utils.sheet_to_json(XLSX.read(Buffer.from(base64, 'base64'), { type: 'buffer' }).Sheets[XLSX.read(Buffer.from(base64, 'base64'), { type: 'buffer' }).SheetNames[1]], { header: 1 })};`)
+
       .replace(/src="images\//g, 'src="/images/'); // <-- ✅ Convert local to absolute path
 
     const octokit = new Octokit({ auth: process.env.GH_TOKEN });

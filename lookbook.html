@@ -521,20 +521,7 @@ content.innerHTML = `
 `;
 
 
-      const commentBox = document.createElement('textarea');
-      commentBox.className = 'comment-box';
-      commentBox.placeholder = 'Add comment...';
-// Restore checkbox, qty, and comment from savedSelections
-const saved = savedSelections[opt.number] || {};
 
-checkbox.checked = saved.checked || false;
-qtyInput.value = saved.qty || 1;
-commentBox.value = saved.comment || '';
-
-// If checkbox is checked, update total
-if (checkbox.checked) {
-  selectedTotal += (parseFloat(opt.price) || 0) * (parseInt(qtyInput.value) || 1);
-}
 
       card.appendChild(checkboxContainer);
       card.appendChild(img);

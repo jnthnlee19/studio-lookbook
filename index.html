@@ -99,9 +99,10 @@
 const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
 localStorage.setItem('lookbookData', JSON.stringify(rows));
-const base64Workbook = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
-localStorage.setItem('workbook', base64Workbook);
-
+localStorage.setItem('workbook', btoa(
+  new Uint8Array(e.target.result)
+    .reduce((data, byte) => data + String.fromCharCode(byte), '')
+));
 window.open('lookbook.html', '_blank');
 
     };

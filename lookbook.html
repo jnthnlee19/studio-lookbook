@@ -243,122 +243,14 @@
 
 <div id="lookbook-container">Loading...</div>
 <img id="popup-img" class="enlarged-image" />
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
 <script>
+const rawData = JSON.parse(localStorage.getItem('lookbookData'));
 const container = document.getElementById('lookbook-container');
 const totalPriceEl = document.getElementById('total-price');
 let selectedTotal = 0;
-let rawData = [];
-const base64 = localStorage.getItem("workbook");
-
-if (base64) {
-  // Decode the btoa'd ArrayBuffer from index.html
-const binary = atob(base64);
-const bytes = new Uint8Array(binary.length);
-for (let i = 0; i < binary.length; i++) {
-  bytes[i] = binary.charCodeAt(i);
-}
-const workbook = XLSX.read(bytes, { type: 'array' });
-
-
-  const sheet = workbook.Sheets[workbook.SheetNames[1]];
-  rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-  const infoRow = rawData[11]?.filter(c => c)?.join(' | ') || '';
-  document.querySelector('.info-bar').textContent = infoRow;
-
-
-  const group = {};
-  let currentCategory = null;
-  rawData.slice(14).forEach(row => {
-    const col0 = row[0];
-    const col2 = row[2];
-    const col9 = row[9];
-    const col13 = row[13];
-
-    if (typeof col0 === 'string' && col0.includes('>') && !col13) {
-      currentCategory = col0.trim();
-      if (!group[currentCategory]) group[currentCategory] = [];
-      return;
-    }
-
-    if (!isNaN(col0) && col2) {
-      const option = {
-        number: col0,
-        desc: col2,
-        sales: col9 || '',
-        price: col13 || ''
-      };
-      if (currentCategory) {
-        group[currentCategory].push(option);
-      }
-    }
-  });
-
-  container.innerHTML = '';
-
-  for (const category in group) {
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    summary.textContent = category;
-    details.appendChild(summary);
-
-    const grid = document.createElement('div');
-    grid.className = 'option-grid';
-
-    group[category].forEach(opt => {
-      const card = document.createElement('div');
-      card.className = 'option-card';
-
-      const checkboxContainer = document.createElement('div');
-      checkboxContainer.className = 'checkbox-container';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'option-select';
-
-      const label = document.createElement('label');
-      label.innerText = 'Selection Option';
-
-      checkboxContainer.appendChild(checkbox);
-      checkboxContainer.appendChild(label);
-
-      const commentBox = document.createElement('textarea');
-      commentBox.className = 'comment-box';
-      commentBox.placeholder = 'Add comment...';
-
-      const img = document.createElement('img');
-      img.src = `/images/${opt.number}.jpg`;
-      img.alt = opt.desc;
-      img.onerror = () => img.src = 'https://via.placeholder.com/150';
-      img.onclick = () => showImageSlideshow(opt.number);
-
-      const content = document.createElement('div');
-      content.className = 'option-card-content';
-      content.innerHTML = `
-        <strong>${opt.number}</strong>
-        ${opt.desc}<br>
-        <em>${opt.sales}</em><br>
-        <label>Qty: <input type="number" class="qty-input" min="1" value="1" onchange="updateOptionTotal(this, ${parseFloat(opt.price) || 0})"></label><br>
-        <strong class="option-total">$${opt.price || 'TBD'}</strong>
-      `;
-
-      card.appendChild(checkboxContainer);
-      card.appendChild(img);
-      card.appendChild(content);
-      card.appendChild(commentBox);
-
-      grid.appendChild(card);
-    });
-
-    details.appendChild(grid);
-    container.appendChild(details);
-  }
-
-  updateTotal();
-}
-
+  const selectionsKey = "lookbookSelections";
+let savedSelections = JSON.parse(localStorage.getItem(selectionsKey) || '{}');
 
 let allExpanded = false;
 
@@ -493,6 +385,41 @@ function showImageSlideshow(baseName) {
   document.body.appendChild(popupContainer);
 }
 
+if (!rawData || rawData.length === 0) {
+  container.innerHTML = '<p style="text-align:center;">No data found.</p>';
+} else {
+  const infoRow = rawData[11]?.filter(c => c)?.join(' | ') || '';
+  document.querySelector('.info-bar').textContent = infoRow;
+
+  let currentCategory = null;
+  const group = {};
+// Load saved selections if any
+
+
+rawData.slice(14).forEach(row => {
+  const col0 = row[0];
+  const col2 = row[2];
+  const col9 = row[9];
+  const col13 = row[13];
+
+  if (typeof col0 === 'string' && col0.includes('>') && !col13) {
+    currentCategory = col0.trim();
+    if (!group[currentCategory]) group[currentCategory] = [];
+    return;
+  }
+
+  if (!isNaN(col0) && col2) {
+    const option = {
+      number: col0,
+      desc: col2,
+      sales: col9 || '',
+      price: col13 || ''
+    };
+    if (currentCategory) {
+      group[currentCategory].push(option);
+    }
+  }
+});
 
   container.innerHTML = '';
 
@@ -515,15 +442,20 @@ function showImageSlideshow(baseName) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
+// Apply saved state if available
+const saved = savedSelections[opt.number] || {};
+checkbox.checked = saved.checked || false;
 
 const qtyInput = document.createElement('input');
 qtyInput.type = 'number';
 qtyInput.className = 'qty-input';
 qtyInput.min = 1;
+qtyInput.value = saved.qty || 1;
 
 const commentBox = document.createElement('textarea');
 commentBox.className = 'comment-box';
 commentBox.placeholder = 'Add comment...';
+commentBox.value = saved.comment || '';
 
 // Event Listeners
 checkbox.onchange = () => {
@@ -532,29 +464,32 @@ checkbox.onchange = () => {
   checkbox.checked ? selectedTotal += qty * price : selectedTotal -= qty * price;
   updateTotal();
 
+  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: qty,
     comment: commentBox.value
   };
-
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
 
 qtyInput.onchange = () => {
   updateOptionTotal(qtyInput, parseFloat(opt.price) || 0);
 
+  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value
   };
-
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
 
 commentBox.oninput = () => {
+  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value
   };
-
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
 
 // Recalculate total if already selected

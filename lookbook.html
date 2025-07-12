@@ -441,40 +441,38 @@ rawData.slice(14).forEach(row => {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
-checkbox.onchange = () => {
-  const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
-  const commentInput = checkbox.closest('.option-card').querySelector('.comment-box');
-  const qty = parseInt(qtyInput.value) || 1;
-  const unitPrice = parseFloat(opt.price) || 0;
-  const total = qty * unitPrice;
+// Apply saved state if available
+const saved = savedSelections[opt.number] || {};
+checkbox.checked = saved.checked || false;
 
-  // Update total
-  checkbox.checked ? selectedTotal += total : selectedTotal -= total;
+const qtyInput = document.createElement('input');
+qtyInput.type = 'number';
+qtyInput.className = 'qty-input';
+qtyInput.min = 1;
+qtyInput.value = saved.qty || 1;
+
+const commentBox = document.createElement('textarea');
+commentBox.className = 'comment-box';
+commentBox.placeholder = 'Add comment...';
+commentBox.value = saved.comment || '';
+
+// Event Listeners
+checkbox.onchange = () => {
+  const qty = parseInt(qtyInput.value) || 1;
+  const price = parseFloat(opt.price) || 0;
+  checkbox.checked ? selectedTotal += qty * price : selectedTotal -= qty * price;
   updateTotal();
 
-  // Save to localStorage
   savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: qty,
-    comment: commentInput.value
+    comment: commentBox.value
   };
   localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
 
 qtyInput.onchange = () => {
-  const commentInput = checkbox.closest('.option-card').querySelector('.comment-box');
   updateOptionTotal(qtyInput, parseFloat(opt.price) || 0);
-
-  savedSelections[opt.number] = {
-    checked: checkbox.checked,
-    qty: parseInt(qtyInput.value) || 1,
-    comment: commentInput.value
-  };
-  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
-};
-
-commentBox.oninput = () => {
-  const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
 
   savedSelections[opt.number] = {
     checked: checkbox.checked,
@@ -483,6 +481,22 @@ commentBox.oninput = () => {
   };
   localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
+
+commentBox.oninput = () => {
+  savedSelections[opt.number] = {
+    checked: checkbox.checked,
+    qty: parseInt(qtyInput.value) || 1,
+    comment: commentBox.value
+  };
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+};
+
+// Recalculate total if already selected
+if (checkbox.checked) {
+  selectedTotal += (parseFloat(opt.price) || 0) * (parseInt(qtyInput.value) || 1);
+  updateTotal();
+}
+
 
 
       const label = document.createElement('label');
@@ -511,6 +525,17 @@ content.innerHTML = `
       const commentBox = document.createElement('textarea');
       commentBox.className = 'comment-box';
       commentBox.placeholder = 'Add comment...';
+// Restore checkbox, qty, and comment from savedSelections
+const saved = savedSelections[opt.number] || {};
+
+checkbox.checked = saved.checked || false;
+qtyInput.value = saved.qty || 1;
+commentBox.value = saved.comment || '';
+
+// If checkbox is checked, update total
+if (checkbox.checked) {
+  selectedTotal += (parseFloat(opt.price) || 0) * (parseInt(qtyInput.value) || 1);
+}
 
       card.appendChild(checkboxContainer);
       card.appendChild(img);

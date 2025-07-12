@@ -245,7 +245,7 @@
 <img id="popup-img" class="enlarged-image" />
 
 <script>
-const rawData = JSON.parse(localStorage.getItem('lookbookData'));
+
 const container = document.getElementById('lookbook-container');
 const totalPriceEl = document.getElementById('total-price');
 let selectedTotal = 0;
@@ -442,7 +442,6 @@ rawData.slice(14).forEach(row => {
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
 // Apply saved state if available
-const saved = savedSelections[opt.number] || {};
 checkbox.checked = saved.checked || false;
 
 const qtyInput = document.createElement('input');
@@ -463,7 +462,6 @@ checkbox.onchange = () => {
   checkbox.checked ? selectedTotal += qty * price : selectedTotal -= qty * price;
   updateTotal();
 
-  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: qty,
     comment: commentBox.value
@@ -474,7 +472,6 @@ checkbox.onchange = () => {
 qtyInput.onchange = () => {
   updateOptionTotal(qtyInput, parseFloat(opt.price) || 0);
 
-  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value
@@ -483,7 +480,6 @@ qtyInput.onchange = () => {
 };
 
 commentBox.oninput = () => {
-  savedSelections[opt.number] = {
     checked: checkbox.checked,
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value

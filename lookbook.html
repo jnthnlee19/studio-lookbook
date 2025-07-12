@@ -247,6 +247,9 @@ const rawData = JSON.parse(localStorage.getItem('lookbookData'));
 const container = document.getElementById('lookbook-container');
 const totalPriceEl = document.getElementById('total-price');
 let selectedTotal = 0;
+  const selectionsKey = "lookbookSelections";
+let savedSelections = JSON.parse(localStorage.getItem(selectionsKey) || '{}');
+
 let allExpanded = false;
 
 function updateTotal() {
@@ -388,6 +391,11 @@ if (!rawData || rawData.length === 0) {
 
   let currentCategory = null;
   const group = {};
+// Load saved selections if any
+const selectionsKey = window.location.pathname;
+const savedSelections = JSON.parse(localStorage.getItem(selectionsKey) || '{}');
+
+rawData.slice(14).forEach(row => {
 
   rawData.slice(14).forEach(row => {
     const col0 = row[0];
@@ -437,19 +445,46 @@ if (!rawData || rawData.length === 0) {
       checkbox.className = 'option-select';
 checkbox.onchange = () => {
   const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
+  const commentInput = checkbox.closest('.option-card').querySelector('.comment-box');
   const qty = parseInt(qtyInput.value) || 1;
   const unitPrice = parseFloat(opt.price) || 0;
   const total = qty * unitPrice;
 
-  if (checkbox.checked) {
-    selectedTotal += total;
-  } else {
-    selectedTotal -= total;
-  }
-
+  // Update total
+  checkbox.checked ? selectedTotal += total : selectedTotal -= total;
   updateTotal();
+
+  // Save to localStorage
+  savedSelections[opt.number] = {
+    checked: checkbox.checked,
+    qty: qty,
+    comment: commentInput.value
+  };
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
 };
 
+qtyInput.onchange = () => {
+  const commentInput = checkbox.closest('.option-card').querySelector('.comment-box');
+  updateOptionTotal(qtyInput, parseFloat(opt.price) || 0);
+
+  savedSelections[opt.number] = {
+    checked: checkbox.checked,
+    qty: parseInt(qtyInput.value) || 1,
+    comment: commentInput.value
+  };
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+};
+
+commentBox.oninput = () => {
+  const qtyInput = checkbox.closest('.option-card').querySelector('.qty-input');
+
+  savedSelections[opt.number] = {
+    checked: checkbox.checked,
+    qty: parseInt(qtyInput.value) || 1,
+    comment: commentBox.value
+  };
+  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+};
 
 
       const label = document.createElement('label');

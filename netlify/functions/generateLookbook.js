@@ -1,4 +1,5 @@
 const { Octokit } = require("@octokit/rest");
+const XLSX = require("xlsx");
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -18,13 +19,18 @@ exports.handler = async (event) => {
     const safeAddress = address.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
     const filename = `customers/${safeAddress}.html`;
 
-    const html = "<!DOCTYPE html>\n" + htmlTemplate
-  .replace(/const rawData = .*?;/, `const rawData = ${JSON.stringify(XLSX.utils.sheet_to_json(XLSX.read(Buffer.from(base64, 'base64'), { type: 'buffer' }).Sheets[XLSX.read(Buffer.from(base64, 'base64'), { type: 'buffer' }).SheetNames[1]], { header: 1 })};`)
+    // ✅ Decode + extract rawData from Sheet2
+    const binary = Buffer.from(base64, "base64");
+    const workbook = XLSX.read(binary, { type: "buffer" });
+    const sheet = workbook.Sheets[workbook.SheetNames[1]];
+    const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      .replace(/src="images\//g, 'src="/images/'); // <-- ✅ Convert local to absolute path
+    // ✅ Inject rawData directly into the template
+    const html = "<!DOCTYPE html>\n" + htmlTemplate
+      .replace(/const rawData = .*?;/, `const rawData = ${JSON.stringify(rawData)};`)
+      .replace(/src="images\//g, 'src="/images/');
 
     const octokit = new Octokit({ auth: process.env.GH_TOKEN });
-
     const owner = "jnthnlee19";
     const repo = "studio-lookbook";
 
@@ -78,6 +84,7 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
+    console.error("LOOKBOOK ERROR:", error.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: `GitHub error: ${error.message}` })

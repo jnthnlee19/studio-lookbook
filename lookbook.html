@@ -463,31 +463,19 @@ checkbox.onchange = () => {
   checkbox.checked ? selectedTotal += qty * price : selectedTotal -= qty * price;
   updateTotal();
 
-  savedSelections[opt.number] = {
-    checked: checkbox.checked,
-    qty: qty,
-    comment: commentBox.value
-  };
+
   
 };
 
 qtyInput.onchange = () => {
   updateOptionTotal(qtyInput, parseFloat(opt.price) || 0);
 
-  savedSelections[opt.number] = {
-    checked: checkbox.checked,
-    qty: parseInt(qtyInput.value) || 1,
-    comment: commentBox.value
-  };
+
   
 };
 
 commentBox.oninput = () => {
-  savedSelections[opt.number] = {
-    checked: checkbox.checked,
-    qty: parseInt(qtyInput.value) || 1,
-    comment: commentBox.value
-  };
+
   
 };
 

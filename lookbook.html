@@ -254,18 +254,13 @@ const base64 = localStorage.getItem("workbook");
 
 if (base64) {
   // Decode the btoa'd ArrayBuffer from index.html
-  const binaryStr = atob(base64);
-  const byteArr = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) {
-    byteArr[i] = binaryStr.charCodeAt(i);
-  }
-
-  const binary = atob(base64);
+const binary = atob(base64);
 const bytes = new Uint8Array(binary.length);
 for (let i = 0; i < binary.length; i++) {
   bytes[i] = binary.charCodeAt(i);
 }
 const workbook = XLSX.read(bytes, { type: 'array' });
+
 
   const sheet = workbook.Sheets[workbook.SheetNames[1]];
   rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });

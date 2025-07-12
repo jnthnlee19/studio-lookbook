@@ -250,15 +250,23 @@ const container = document.getElementById('lookbook-container');
 const totalPriceEl = document.getElementById('total-price');
 let selectedTotal = 0;
 let rawData = [];
-  const base64 = localStorage.getItem("workbook");
+const base64 = localStorage.getItem("workbook");
 
 if (base64) {
-  const workbook = XLSX.read(base64, { type: 'base64' });
+  // Decode the btoa'd ArrayBuffer from index.html
+  const binaryStr = atob(base64);
+  const byteArr = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) {
+    byteArr[i] = binaryStr.charCodeAt(i);
+  }
+
+  const workbook = XLSX.read(byteArr, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[1]];
   rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
   const infoRow = rawData[11]?.filter(c => c)?.join(' | ') || '';
   document.querySelector('.info-bar').textContent = infoRow;
+
 
   const group = {};
   let currentCategory = null;

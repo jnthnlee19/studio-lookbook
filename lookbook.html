@@ -453,54 +453,30 @@ if (!rawData || rawData.length === 0) {
   window.location.href = `/customers/${safeName}/index.html`;
 }
 
-</script>
 <script>
-function generatePage() {
+async function generatePage() {
   const address = document.getElementById("address-input").value.trim();
-  if (!address) {
-    alert("Please enter a customer address.");
-    return;
-  }
+  if (!address) return alert("Please enter an address.");
 
-  const sanitizedAddress = address.replace(/[^a-zA-Z0-9]/g, ''); // Safe filename
+  const base64 = localStorage.getItem("workbook");
+  if (!base64) return alert("Missing workbook data.");
 
-  fetch("/.netlify/functions/generateLookbook", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      address: sanitizedAddress,
-      htmlContent: document.documentElement.outerHTML
-    })
-  })
-  .then(res => res.text())
-  .then(msg => alert(msg))
-  .catch(err => {
-    alert("Error creating page: " + err.message);
-  });
-}
-  async function generatePage() {
-  const address = document.getElementById("address-input").value.trim();
-  if (!address) return alert("Please enter an address");
+  const htmlTemplate = document.documentElement.outerHTML;
 
   const response = await fetch("/.netlify/functions/generateLookbook", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address })
+    body: JSON.stringify({ address, base64, htmlTemplate })
   });
 
   const result = await response.json();
 
   if (response.ok) {
-    alert("Page created!");
-    window.open(result.file, "_blank");
+    window.open(result.url, "_blank");
   } else {
-    alert("Error creating file: " + result.error);
-    console.error(result.details);
+    alert("Error creating file: " + (result.error || "Unknown error"));
   }
 }
-
 </script>
 
 </body>

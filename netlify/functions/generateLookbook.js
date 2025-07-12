@@ -5,55 +5,32 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  let address, base64, htmlTemplate;
-
   try {
-    const body = JSON.parse(event.body);
-    address = body.address;
-    base64 = body.base64;
-    htmlTemplate = body.htmlTemplate;
-  } catch (err) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid JSON in request body" }),
-    };
-  }
+    const { address, base64, htmlTemplate } = JSON.parse(event.body);
 
-  if (!address || !base64 || !htmlTemplate) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Missing required fields" }),
-    };
-  }
+    if (!address || !base64 || !htmlTemplate) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing required fields" })
+      };
+    }
 
-  const safeAddress = address.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
-  const filename = `customers/${safeAddress}.html`;
+    const safeAddress = address.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
+    const filename = `customers/${safeAddress}.html`;
 
-  const html = "<!DOCTYPE html>\n" + htmlTemplate.replace(
-    /const base64 = localStorage\.getItem\('workbook'\);/,
-    `const base64 = \`${base64}\`;`
-  );
+    const html = "<!DOCTYPE html>\n" + htmlTemplate
+      .replace(/const base64 = localStorage\.getItem\('workbook'\);/, `const base64 = \`${base64}\`;`)
+      .replace(/src="images\//g, 'src="/images/'); // <-- ✅ Convert local to absolute path
 
-  const octokit = new Octokit({ auth: process.env.GH_TOKEN });
+    const octokit = new Octokit({ auth: process.env.GH_TOKEN });
 
-  const owner = "jnthnlee19"; // or your GitHub username
-  const repo = "studio-lookbook"; // corrected repo name
+    const owner = "jnthnlee19";
+    const repo = "studio-lookbook";
 
-  try {
-    const { data: refData } = await octokit.git.getRef({
-      owner,
-      repo,
-      ref: "heads/main"
-    });
-
+    const { data: refData } = await octokit.git.getRef({ owner, repo, ref: "heads/main" });
     const latestCommitSha = refData.object.sha;
 
-    const { data: commitData } = await octokit.git.getCommit({
-      owner,
-      repo,
-      commit_sha: latestCommitSha
-    });
-
+    const { data: commitData } = await octokit.git.getCommit({ owner, repo, commit_sha: latestCommitSha });
     const baseTree = commitData.tree.sha;
 
     const { data: blobData } = await octokit.git.createBlob({
@@ -100,12 +77,9 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error("GitHub write error:", error); // ✅ helpful for debugging
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: `GitHub error: ${error.message || "Unknown error"}`
-      })
+      body: JSON.stringify({ error: `GitHub error: ${error.message}` })
     };
   }
 };

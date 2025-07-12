@@ -249,8 +249,7 @@ const rawData = JSON.parse(localStorage.getItem('lookbookData'));
 const container = document.getElementById('lookbook-container');
 const totalPriceEl = document.getElementById('total-price');
 let selectedTotal = 0;
-  const selectionsKey = "lookbookSelections";
-let savedSelections = JSON.parse(localStorage.getItem(selectionsKey) || '{}');
+
 
 let allExpanded = false;
 
@@ -469,7 +468,7 @@ checkbox.onchange = () => {
     qty: qty,
     comment: commentBox.value
   };
-  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+
 };
 
 qtyInput.onchange = () => {
@@ -480,7 +479,7 @@ qtyInput.onchange = () => {
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value
   };
-  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+
 };
 
 commentBox.oninput = () => {
@@ -489,7 +488,7 @@ commentBox.oninput = () => {
     qty: parseInt(qtyInput.value) || 1,
     comment: commentBox.value
   };
-  localStorage.setItem(selectionsKey, JSON.stringify(savedSelections));
+
 };
 
 // Recalculate total if already selected

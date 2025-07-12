@@ -445,39 +445,44 @@ if (!rawData || rawData.length === 0) {
 
   updateTotal();
 }
+  <script>
   function generateLookbook() {
-  const name = document.getElementById("address-input").value.trim();
-  if (!name) return alert("Please enter a name or address");
+    const name = document.getElementById("address-input").value.trim();
+    if (!name) return alert("Please enter a name or address");
 
-  const safeName = name.toLowerCase().replace(/[^a-z0-9]/gi, '-');
-  window.location.href = `/customers/${safeName}/index.html`;
-}
-<script>
-<script>
-async function generatePage() {
-  const address = document.getElementById("address-input").value.trim();
-  if (!address) return alert("Please enter an address.");
-
-  const base64 = localStorage.getItem("workbook");
-  if (!base64) return alert("Missing workbook data.");
-
-  const htmlTemplate = document.documentElement.outerHTML;
-
-  const response = await fetch("/.netlify/functions/generateLookbook", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address, base64, htmlTemplate })
-  });
-
-  const result = await response.json();
-
-  if (response.ok) {
-    window.open(result.url, "_blank");
-  } else {
-    alert("Error creating file: " + (result.error || "Unknown error"));
+    const safeName = name.toLowerCase().replace(/[^a-z0-9]/gi, '-');
+    window.location.href = `/customers/${safeName}/index.html`;
   }
-}
+
+  async function generatePage() {
+    const address = document.getElementById("address-input").value.trim();
+    if (!address) return alert("Please enter an address.");
+
+    const base64 = localStorage.getItem("workbook");
+    if (!base64) return alert("Missing workbook data.");
+
+    const htmlTemplate = document.documentElement.outerHTML;
+
+    const response = await fetch("/.netlify/functions/generateLookbook", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address, base64, htmlTemplate })
+    });
+
+    try {
+      const result = await response.json();
+      if (response.ok) {
+        window.open(result.url, "_blank");
+      } else {
+        alert("Error creating file: " + (result.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("Error parsing response. Check your Netlify function.");
+      console.error("Response error:", e);
+    }
+  }
 </script>
+
 
 </body>
 </html>

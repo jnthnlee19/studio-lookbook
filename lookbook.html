@@ -209,26 +209,27 @@
 
   <div class="sticky-center">
     <h1>KB Home Lookbook</h1>
-    <div class="controls">
-      <button onclick="toggleAll()">Expand/Collapse All</button>
-      <button onclick="printAllOptions()">Print All Options</button><br />
-<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
-  <input
-    type="text"
-    id="search-input"
-    placeholder="Search by option # or description..."
-    oninput="searchOptions()"
-    style="padding: 0.4rem; border-radius: 6px; border: 1px solid #ccc; max-width: 250px;"
-  />
-<div id="generate-section">
-  <input
-    type="text"
-    id="address-input"
-    placeholder="Enter customer address..."
-    style="margin-top: 0.5rem; padding: 0.4rem; max-width: 350px; border-radius: 6px; border: 1px solid #ccc;"
-  />
-  <button onclick="generatePage()">Generate</button>
+  <div class="controls">
+  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+    <button onclick="toggleAll()">Expand/Collapse All</button>
+    <button onclick="printAllOptions()">Print All Options</button>
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search by option # or description..."
+      oninput="searchOptions()"
+    />
+    <div id="generate-section">
+      <input
+        type="text"
+        id="address-input"
+        placeholder="Enter customer address..."
+      />
+      <button onclick="generatePage()">Generate</button>
+    </div>
+  </div>
 </div>
+
 
 
     </div>

@@ -61,7 +61,7 @@ await fetch("https://api.brevo.com/v3/smtp/email", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "api-key": process.env.NF61QOsJr2A7DjgP
+    "api-key": process.env.BREVO_API_KEY
   },
   body: JSON.stringify({
     sender: { name: "Lookbook Alerts", email: "jrice@kbhome.com" },

@@ -672,8 +672,15 @@ async function saveSelections() {
   if (selections.length === 0) return alert("No selections to save.");
 
   const total = selections.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const customerName = document.querySelector('#address-input')?.value.trim() || 'wishlist';
-  const safeName = customerName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
+let customerName = document.querySelector('#address-input')?.value.trim();
+
+if (!customerName) {
+  const match = window.location.pathname.match(/\/customers\/([^\/]+)/);
+  customerName = match ? match[1] : 'wishlist';
+}
+
+const safeName = customerName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
+
 
   const html = generateWishlistHTML(selections, total, customerName);
 

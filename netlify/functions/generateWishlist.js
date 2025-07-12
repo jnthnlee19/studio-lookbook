@@ -56,22 +56,5 @@ exports.handler = async function (event, context) {
     };
   }
 };
-// Send email using Brevo (Sendinblue)
-await fetch("https://api.brevo.com/v3/smtp/email", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "api-key": process.env.BREVO_API_KEY
-  },
-  body: JSON.stringify({
-    sender: { name: "Lookbook Alerts", email: "jrice@kbhome.com" },
-    to: [{ email: "jrice@kbhome.com", name: "You" }],
-    subject: `New Wishlist: ${address}`,
-    htmlContent: `
-      <h3>New Wishlist Created</h3>
-      <p><strong>Customer:</strong> ${address}</p>
-      <p><a href="https://studiolookbook.netlify.app/customers/${address}/index.html">View Wishlist Page</a></p>
-    `
-  })
-});
+
 

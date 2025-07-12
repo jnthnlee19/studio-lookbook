@@ -260,7 +260,13 @@ if (base64) {
     byteArr[i] = binaryStr.charCodeAt(i);
   }
 
-  const workbook = XLSX.read(byteArr, { type: 'array' });
+  const binary = atob(base64);
+const bytes = new Uint8Array(binary.length);
+for (let i = 0; i < binary.length; i++) {
+  bytes[i] = binary.charCodeAt(i);
+}
+const workbook = XLSX.read(bytes, { type: 'array' });
+
   const sheet = workbook.Sheets[workbook.SheetNames[1]];
   rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 

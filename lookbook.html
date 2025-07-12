@@ -335,7 +335,7 @@ function showImageSlideshow(baseName) {
   };
 
   preloadAndShow();
-  mainImg.src = `images/${baseName}.jpg`;
+  mainImg.src = `/images/${baseName}.jpg`;
 
   popupContainer.appendChild(closeBtn);
   popupContainer.appendChild(mainImg);
@@ -413,7 +413,7 @@ if (!rawData || rawData.length === 0) {
       checkboxContainer.appendChild(label);
 
       const img = document.createElement('img');
-      img.src = `images/${opt.number}.jpg`;
+      img.src = `/images/${opt.number}.jpg`;
       img.alt = opt.desc;
       img.onerror = () => img.src = 'https://via.placeholder.com/150';
       img.onclick = () => showImageSlideshow(opt.number);

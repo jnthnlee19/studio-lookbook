@@ -584,6 +584,84 @@ if (window.location.pathname.includes('/customers/')) {
   const printBtn = document.getElementById('print-btn');
   if (printBtn) printBtn.style.display = 'none';
 }
+  function generateWishlistHTML(selections, total, customerName) {
+  const rows = selections.map(opt => `
+    <tr>
+      <td><img src="${opt.imgSrc}" alt="${opt.desc}" style="height:80px; width:auto; object-fit:contain;"/></td>
+      <td>${opt.number}</td>
+      <td>
+        <strong>${opt.desc}</strong><br/>
+        <em>${opt.sales}</em><br/>
+        <small><strong>Qty:</strong> ${opt.qty}</small><br/>
+        ${opt.comment ? `<div><strong>Note:</strong> ${opt.comment}</div>` : ''}
+      </td>
+      <td>$${(opt.price * opt.qty).toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Selections for ${customerName}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style>
+        body {
+          font-family: 'Segoe UI', sans-serif;
+          margin: 2rem;
+          background: #fff;
+          color: #000;
+        }
+        h1 {
+          text-align: center;
+        }
+        .summary-bar {
+          text-align: center;
+          font-weight: bold;
+          font-size: 1.1rem;
+          margin-bottom: 1.5rem;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
+        th, td {
+          padding: 0.8rem;
+          border-bottom: 1px solid #ccc;
+          vertical-align: top;
+          text-align: left;
+          font-size: 0.95rem;
+        }
+        th {
+          background: #f2f2f2;
+        }
+        img {
+          border-radius: 6px;
+          background: #f9f9f9;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Selections for ${customerName}</h1>
+      <div class="summary-bar">Total: $${total.toFixed(2)}</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Option #</th>
+            <th>Description</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 async function saveSelections() {
   const selections = [];
   document.querySelectorAll('.option-card').forEach(card => {

@@ -392,7 +392,6 @@ if (!rawData || rawData.length === 0) {
 
   let currentCategory = null;
   const group = {};
-// Load saved selections if any
 
 
 rawData.slice(14).forEach(row => {
@@ -441,19 +440,15 @@ rawData.slice(14).forEach(row => {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'option-select';
-// Apply saved state if available
-checkbox.checked = saved.checked || false;
 
 const qtyInput = document.createElement('input');
 qtyInput.type = 'number';
 qtyInput.className = 'qty-input';
 qtyInput.min = 1;
-qtyInput.value = saved.qty || 1;
 
 const commentBox = document.createElement('textarea');
 commentBox.className = 'comment-box';
 commentBox.placeholder = 'Add comment...';
-commentBox.value = saved.comment || '';
 
 // Event Listeners
 checkbox.onchange = () => {

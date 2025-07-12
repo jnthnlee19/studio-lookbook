@@ -584,6 +584,55 @@ if (window.location.pathname.includes('/customers/')) {
   const printBtn = document.getElementById('print-btn');
   if (printBtn) printBtn.style.display = 'none';
 }
+async function saveSelections() {
+  const selections = [];
+  document.querySelectorAll('.option-card').forEach(card => {
+    const checkbox = card.querySelector('.option-select');
+    if (!checkbox.checked) return;
+
+    const qtyInput = card.querySelector('.qty-input');
+    const commentBox = card.querySelector('.comment-box');
+    const number = card.querySelector('strong')?.textContent || '';
+    const desc = card.querySelector('.option-card-content')?.childNodes[2]?.textContent?.trim() || '';
+    const sales = card.querySelector('em')?.textContent || '';
+    const priceText = card.querySelector('.option-total')?.textContent?.replace('$', '') || '0';
+    const price = parseFloat(priceText) || 0;
+    const qty = parseInt(qtyInput.value) || 1;
+    const comment = commentBox.value || '';
+    const imgSrc = card.querySelector('img')?.getAttribute('src') || '';
+
+    selections.push({ number, desc, sales, price, qty, comment, imgSrc });
+  });
+
+  if (selections.length === 0) return alert("No selections to save.");
+
+  const total = selections.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const customerName = document.querySelector('#address-input')?.value.trim() || 'wishlist';
+  const safeName = customerName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
+
+  const html = generateWishlistHTML(selections, total, customerName);
+
+  const response = await fetch("/.netlify/functions/generateWishlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      address: safeName,
+      htmlTemplate: html
+    })
+  });
+
+  try {
+    const result = await response.json();
+    if (response.ok) {
+      window.open(result.url, "_blank");
+    } else {
+      alert("Error creating wishlist: " + (result.error || "Unknown error"));
+    }
+  } catch (e) {
+    alert("Error parsing response. Check your Netlify function.");
+    console.error("Response error:", e);
+  }
+}
 
 </script>
 

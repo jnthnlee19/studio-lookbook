@@ -12,7 +12,7 @@ exports.handler = async function (event, context) {
     }
 
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: process.env.GH_TOKEN,
     });
 
     const repo = "studio-lookbook"; // ✅ Make sure this is correct

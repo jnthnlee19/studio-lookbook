@@ -19,15 +19,15 @@ exports.handler = async (event) => {
     const safeAddress = address.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\-]/g, "");
     const filename = `customers/${safeAddress}.html`;
 
-    // ✅ Decode + extract rawData from Sheet2
+    // Read Excel data
     const binary = Buffer.from(base64, "base64");
     const workbook = XLSX.read(binary, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[1]];
     const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-    // ✅ Inject rawData directly into the template
+    // Replace placeholder with actual data
     const html = "<!DOCTYPE html>\n" + htmlTemplate
-      .replace(/const rawData = .*?;/, `const rawData = ${JSON.stringify(rawData)};`)
+      .replace("const rawData = {{LOOKBOOK_DATA}}", `const rawData = ${JSON.stringify(rawData)};`)
       .replace(/src="images\//g, 'src="/images/');
 
     const octokit = new Octokit({ auth: process.env.GH_TOKEN });

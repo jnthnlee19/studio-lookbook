@@ -212,7 +212,9 @@
   <div class="controls">
     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
       <button onclick="toggleAll()">Expand/Collapse All</button>
-      <button onclick="printAllOptions()">Print All Options</button>
+     <button id="print-btn" onclick="printAllOptions()">Print All Options</button>
+<button id="save-btn" onclick="saveSelections()">Save Selections</button>
+
       <input
         type="text"
         id="search-input"
@@ -576,6 +578,11 @@ content.innerHTML = `
 if (window.location.pathname.includes('/customers/')) {
   const genSection = document.getElementById('generate-section');
   if (genSection) genSection.style.display = 'none';
+}
+// Also hide Print All button on customer pages
+if (window.location.pathname.includes('/customers/')) {
+  const printBtn = document.getElementById('print-btn');
+  if (printBtn) printBtn.style.display = 'none';
 }
 
 </script>

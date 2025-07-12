@@ -46,7 +46,7 @@ const path = `customers/${address}/wishlist/index.html`;
     return {
       statusCode: 200,
       body: JSON.stringify({
-        url: `https://studiolookbook.netlify.app/customers/${address}/index.html`,
+url: `https://studiolookbook.netlify.app/customers/${address}/wishlist/`,
       }),
     };
   } catch (error) {

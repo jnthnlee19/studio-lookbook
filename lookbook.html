@@ -395,7 +395,6 @@ if (!rawData || rawData.length === 0) {
 const selectionsKey = window.location.pathname;
 const savedSelections = JSON.parse(localStorage.getItem(selectionsKey) || '{}');
 
-rawData.slice(14).forEach(row => {
 
   rawData.slice(14).forEach(row => {
     const col0 = row[0];

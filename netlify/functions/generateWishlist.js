@@ -16,7 +16,7 @@ exports.handler = async function (event, context) {
     });
 
     const repo = "studio-lookbook"; // ✅ Make sure this is correct
-    const owner = "your-github-username"; // 🔁 Replace with your GitHub username
+    const owner = "jnthnlee19"; // 🔁 Replace with your GitHub username
     const path = `customers/${address}/index.html`;
 
     // Check if file already exists (optional)

@@ -2,28 +2,27 @@ const { Octokit } = require("@octokit/rest");
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method Not Allowed" })
-    };
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  let bodyData;
+  let address, base64, htmlTemplate;
+
   try {
-    bodyData = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    address = body.address;
+    base64 = body.base64;
+    htmlTemplate = body.htmlTemplate;
   } catch (err) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Invalid JSON in request body" })
+      body: JSON.stringify({ error: "Invalid JSON in request body" }),
     };
   }
-
-  const { address, base64, htmlTemplate } = bodyData;
 
   if (!address || !base64 || !htmlTemplate) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing required fields" })
+      body: JSON.stringify({ error: "Missing required fields" }),
     };
   }
 
@@ -37,14 +36,24 @@ exports.handler = async (event) => {
 
   const octokit = new Octokit({ auth: process.env.GH_TOKEN });
 
-  const owner = "jnthnlee19";
-  const repo = "studio-lookbook";
+  const owner = "jnthnlee19"; // or your GitHub username
+  const repo = "studio-lookbook"; // corrected repo name
 
   try {
-    const { data: refData } = await octokit.git.getRef({ owner, repo, ref: "heads/main" });
+    const { data: refData } = await octokit.git.getRef({
+      owner,
+      repo,
+      ref: "heads/main"
+    });
+
     const latestCommitSha = refData.object.sha;
 
-    const { data: commitData } = await octokit.git.getCommit({ owner, repo, commit_sha: latestCommitSha });
+    const { data: commitData } = await octokit.git.getCommit({
+      owner,
+      repo,
+      commit_sha: latestCommitSha
+    });
+
     const baseTree = commitData.tree.sha;
 
     const { data: blobData } = await octokit.git.createBlob({
@@ -85,15 +94,18 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-body: JSON.stringify({ url: `https://studiolookbook.netlify.app/customers/${safeAddress}.html` })
-
+      body: JSON.stringify({
+        url: `https://studiolookbook.netlify.app/customers/${safeAddress}.html`
       })
     };
 
   } catch (error) {
+    console.error("GitHub write error:", error); // ✅ helpful for debugging
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: `GitHub error: ${error.message}` })
+      body: JSON.stringify({
+        error: `GitHub error: ${error.message || "Unknown error"}`
+      })
     };
   }
 };

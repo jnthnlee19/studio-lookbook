@@ -38,7 +38,7 @@ exports.handler = async (event) => {
   const octokit = new Octokit({ auth: process.env.GH_TOKEN });
 
   const owner = "jnthnlee19";
-  const repo = "my-studio-lookbook";
+  const repo = "studio-lookbook";
 
   try {
     const { data: refData } = await octokit.git.getRef({ owner, repo, ref: "heads/main" });
@@ -85,8 +85,8 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        url: `https://myonlinelookbook.netlify.app/customers/${safeAddress}.html`
+body: JSON.stringify({ url: `https://studiolookbook.netlify.app/customers/${safeAddress}.html` })
+
       })
     };
 
